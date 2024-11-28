@@ -1,5 +1,4 @@
 *.txt
 .vscode/
 .main.c.swp
-./read.txt
-./chip8
+.chip8
