@@ -27,11 +27,9 @@ struct chip8structure{
 	uint8_t sp;
 	//16 : 8bit general purpose register
 	uint8_t Register[16];
-
-	
+	//display
+	uint8_t display[64*32];
 };
-//*********handle the opcodes.*************
-//not done
 
 
 //declare pointer globally
@@ -54,7 +52,7 @@ int Initialize(struct chip8structure *c8){
 	c8->sp=0;
 
 	//clear screen 00E0
-	
+	memset(c8->display,0,sizeof(c8->display));
 
 	return 0;
 }
@@ -78,17 +76,32 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 		//Emulate one cycle of the system
 		int running = 1;//true
 		while(running){
-
-			 
-		
 			//fetch
 			uint16_t opcode= c8->memory[c8->PC] << 8 | c8->memory[c8->PC+1];//fetch instruction
-			//decode
-			//execute
+			//decode //execute
+			//*********handle the opcodes.*************
+			switch(opcode){
+				case 0x00E0:{
+					//clear screen
+					memset(c8->display,0,sizeof(c8->display));
+					printf("screen clear\n");
+					break;  
+				}
+				case 0x00EE:{
+					//The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
+					
+					c8->stack[c8->sp]=c8->PC;
+					c8->sp--; 
+					break;
+				}
 
-			//pc pointing should increment so increment 2 bytes
+				default:
+				printf("unknown opcode: 0x%04X\n", opcode);
+			}
+			running =0;
+			
 			c8->PC += 2;//add 2bytes from 0x002 which is the nxt opcode
-		 	//when no instruction change running to 0
+		 	
 			if(c8->PC > 0xFFF){ // CHIP-8 memory is 4,096 bytes (from 0x0000 to 0xFFF)
 				running =0;
 			}
