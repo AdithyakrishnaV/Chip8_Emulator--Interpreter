@@ -1,6 +1,5 @@
-Makefile
 *.txt
 .vscode/
-./main.c.swp
+.main.c.swp
 ./read.txt
 ./chip8
