@@ -90,43 +90,47 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 		}
 		//starting address //0x200
 		
-		uint16_t readByte= fread(c8->memory+0x002, 1, sizeof(c8->memory)-0x002, file);
+		uint16_t readByte= fread(c8->memory+0x200, 1, sizeof(c8->memory)-0x200, file);
+		//check if correctly read
+		for(int i=0x200; i<0x200+readByte; i++){
+			printf("Memory[%03X] = %02X\n",i, c8->memory[i]);
+		}
 
 		c8->PC=0x002; //pc holds address
 
 		//Emulate one cycle of the system
 		int running = 1;//true
-		while(running){
-			//fetch
-			uint16_t opcode= c8->memory[c8->PC] << 8 | c8->memory[c8->PC+1];//fetch instruction
-			//decode //execute
-			//*********handle the opcodes.*************
-			switch(opcode){
-				case 0x00E0:{
-					//clear screen
-					memset(c8->display,0,sizeof(c8->display));
-					printf("screen clear\n");
-					break;  
-				}
-				case 0x00EE:{
-					//The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
+		// while(running){
+		// 	//fetch
+		// 	uint16_t opcode= c8->memory[c8->PC] << 8 | c8->memory[c8->PC+1];//fetch instruction
+		// 	//decode //execute
+		// 	//*********handle the opcodes.*************
+		// 	switch(opcode){
+		// 		case 0x00E0:{
+		// 			//clear screen
+		// 			memset(c8->display,0,sizeof(c8->display));
+		// 			printf("screen clear\n");
+		// 			break;  
+		// 		}
+		// 		case 0x00EE:{
+		// 			//The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
 					
-					c8->stack[c8->sp]=c8->PC;
-					c8->sp--; 
-					break;
-				}
+		// 			c8->stack[c8->sp]=c8->PC;
+		// 			c8->sp--; 
+		// 			break;
+		// 		}
 
-				default:
-				printf("unknown opcode: 0x%04X\n", opcode);
-			}
-			running =0;
+		// 		default:
+		// 		printf("unknown opcode: 0x%04X\n", opcode);
+		// 	}
+		// 	running =0;
 			
-			c8->PC += 2;//add 2bytes from 0x002 which is the nxt opcode
+		// 	c8->PC += 2;//add 2bytes from 0x002 which is the nxt opcode
 		 	
-			if(c8->PC > 0xFFF){ // CHIP-8 memory is 4,096 bytes (from 0x0000 to 0xFFF)
-				running =0;
-			}
-		}
+		// 	if(c8->PC > 0xFFF){ // CHIP-8 memory is 4,096 bytes (from 0x0000 to 0xFFF)
+		// 		running =0;
+		// 	}
+		// }
 		//close file
 		fclose(file);
 		
