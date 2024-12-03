@@ -111,25 +111,61 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 
 			//decode //execute
 			//*********handle the opcodes.*************
-			switch(opcode){
-				case 0x00E0:{
-					//clear screen
-					memset(c8->display,0,sizeof(c8->display));
-					printf("screen clear\n");
-					break;  
+			uint8_t type = (opcode&0xF000) >> 12;//right shift 12 bits -> 0110 0000 0000 0000 >> 12 = 0000 0000 0000 0110
+			uint16_t NNN = opcode&0x0FFF;
+			uint8_t  NN = opcode&0x00FF;
+			uint8_t  N = opcode&0x000F;
+			uint16_t X = opcode&0x0F00;
+			uint16_t Y= opcode&0x00F0;
+			
+			switch(type){//DEcode first nibble
+				case 0x0:
+				{
+					switch(NNN){// handle special case for 0x0NNN
+						case 0x00E0:{
+						//clear screen
+						memset(c8->display,0,sizeof(c8->display));
+						printf("screen clear\n");
+						break; 
+						}
+						
+						case 0x0EE:{
+							c8->stack[c8->sp]=c8->PC; //sets program counter to the address at the top of the stack
+							c8->sp--;//subtracts 1 from the stack pointer
+							break;
+						}
+
+						default:
+							break;
+					}
+
+					break; 
 				}
-				case 0x00EE:{
-					//The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
-					
-					c8->stack[c8->sp]=c8->PC;
-					c8->sp--; 
+				
+				case 0x1:{
+					c8->PC=NNN;//sets the PC to nnn.
+
+					break;
+				}
+				
+				case 0x2:{//Call subroutine at nnn.
+					c8->sp++;//increments the stack pointer
+					c8->stack[c8->sp]= c8->PC;//puts the current PC on the top of the stack
+					c8->PC=NNN;//PC is set to nnn
 					break;
 				}
 
+				case 0x3:{
+					
+					break;
+				}
+
+
 				default:
 				printf("unknown opcode: 0x%04X\n", opcode);
+				running = 0;
 			}
-			running = 0;
+			
 			
 			c8->PC += 2;//add 2bytes from 0x002 which is the nxt opcode
 		 	
