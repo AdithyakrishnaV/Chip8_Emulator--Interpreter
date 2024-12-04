@@ -25,8 +25,8 @@ struct chip8structure{
 	uint16_t stack[16];
 	//stack pointer
 	uint8_t sp;
-	//16 : 8bit general purpose register
-	uint8_t Register[16];
+	//16 : 8bit general purpose Register
+	uint8_t V[16];
 	//display
 	uint8_t display[64*32];
 };
@@ -62,7 +62,7 @@ int Initialize(struct chip8structure *c8){
 	//clean memory
 	memset(c8->memory, 0, sizeof(c8->memory));
 	//clean register
-	memset(c8->Register,0,sizeof(c8->Register));
+	memset(c8->V,0,sizeof(c8->V));
 	
 	c8->PC=0;
 	c8->I=0;
@@ -100,8 +100,10 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 		c8->PC=0x200; //PC holds address
 
 		//Emulate one cycle of the system
+		c8->V[0xF] = 0;//Clear VF flag before starting the loop
 		int running = 1;//true
 		while(running){
+
 			//fetch
 			uint16_t opcode= c8->memory[c8->PC] << 8 | c8->memory[c8->PC+1];//fetch instruction
 
@@ -115,10 +117,11 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 			uint16_t NNN = opcode&0x0FFF;
 			uint8_t  NN = opcode&0x00FF;
 			uint8_t  N = opcode&0x000F;
-			uint16_t X = opcode&0x0F00;
-			uint16_t Y= opcode&0x00F0;
-			
-			switch(type){//DEcode first nibble
+			uint16_t X = (opcode&0x0F00) >> 8;
+			uint16_t Y= (opcode&0x00F0) >> 4;
+			printf("X = %02X\n", X);
+			printf("Y = %02X\n", Y);
+			switch(type){//Decode first nibble
 				case 0x0:
 				{
 					switch(NNN){// handle special case for 0x0NNN
@@ -144,7 +147,6 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 				
 				case 0x1:{
 					c8->PC=NNN;//sets the PC to nnn.
-
 					break;
 				}
 				
@@ -156,11 +158,167 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 				}
 
 				case 0x3:{
-					
+					if(c8->V[X]==NN){
+						c8->PC+=2;//increments the program counter by 2
+					}
 					break;
 				}
 
+				case 0x4:{
+					if(c8->V[X] != NN){
+						c8->PC+=2;
+					}
+					break;
+				}
 
+				case 0x5:{
+					if(c8->V[X]==c8->V[Y]){
+						c8->PC+=2;
+					}
+					break;
+				}
+
+				case 0x6:{
+					c8->V[X]==NN;
+					break;
+				}
+
+				case 0x7:{
+					c8->V[X]+=NN;
+					break;
+				}
+
+				case 0x8:{
+					switch(N){// Extract the last nibble
+
+						case 0x0:{
+						c8->V[X]=c8->V[Y];
+						break;
+						}
+
+						case 0x1:{
+							c8->V[X] |= c8->V[Y];
+							break;
+						}
+
+						case 0x2:{
+							c8->V[X] &= c8->V[Y]; 
+							break;
+						}
+
+						case 0x3:{
+							c8->V[X] ^= c8->V[Y]; 
+							break;
+						}
+
+						case 0x4:{
+							uint16_t result = c8->V[X] + c8->V[Y];//16-bit variable (result) used to preserve the full result or it will be truncated to 8bit
+							c8->V[0xF] =((result)>0xFF) ? 1:0;// If the result exceeds 0xFF (255 in decimal), it means there was an overflow, and the carry flag (VF) is set to 1. Otherwise, 0.
+							c8->V[X]=result & 0xFF;//Store only the lowest 8 bits.
+							break;
+						}
+
+						case 0x5:{
+							c8->V[0xF]=(c8->V[X]>=c8->V[Y])?1:0;
+							c8->V[X]-=c8->V[Y];
+							 break;
+						}
+
+						case 0x6:{//0x1 in binary is 00000001
+							c8->V[0xF] = c8->V[X]&0X1;//bitwise AND operation with V[X], isolate the least significant bit (LSB) of V[X].
+							c8->V[X]>>=1;
+							break;
+						}
+
+						case 0x7:{
+							c8->V[0XF] = (c8->V[Y]>-c8->V[X])?1:0;
+							c8->V[X] = c8->V[Y] - c8->V[X];
+							break;
+						}	
+
+						case 0xE:{
+							c8->V[0xF]=(c8->V[X] & 0x80)>>7;
+							c8->V[X]<<=1;
+							break;
+						}
+
+						default:
+							break;
+					}
+
+					break;
+				}
+
+				case 0x9:{
+					if(c8->V[X] != c8->V[Y]){
+						c8->PC+=2;
+					}
+					break;
+				}
+
+				case 0xA:{
+					c8->I=NNN;
+					break;
+				}
+
+				case 0xB:{
+					c8->PC=NNN+c8->V[0];
+					break;
+				}
+
+				case 0xC:{
+					c8->V[X]= (rand()%256) & NN;//% 256 ensures that the result is within the range 0–255
+					break;
+				}
+
+				case 0xD: { 
+					uint8_t x = c8->V[X]; // X position
+					uint8_t y = c8->V[Y]; // Y position
+					uint8_t n = N;         // Height of sprite (in bytes)
+					uint8_t spriteByte;    // To hold each byte of the sprite
+
+					c8->V[0xF] = 0; // Clear VF flag before drawing
+
+					for (int row = 0; row < n; row++) {
+						// Fetch the sprite byte from memory
+						spriteByte = c8->memory[c8->I + row];
+						
+						for (int col = 0; col < 8; col++) {
+							// Get the current pixel (bitwise operation)
+							uint8_t pixel = (spriteByte >> (7 - col)) & 0x1;
+							int screenX = (x + col) % 64; // Wrap around horizontally
+							int screenY = (y + row) % 32; // Wrap around vertically
+
+							// Check if the pixel is on the screen
+							if (pixel) {
+								// If the pixel is on, XOR it with the existing screen pixel
+								if (c8->display[screenY * 64 + screenX] == 1) {
+									c8->V[0xF] = 1; // Set VF flag if pixel is erased (collision)
+								}
+								c8->display[screenY * 64 + screenX] ^= 1; // XOR operation
+							}
+						}
+					}
+					break;
+				}
+
+				case 0xE:{
+					switch (NN)
+					{
+					case 0x9E:{
+						break;
+					}
+					case 0xA1:{
+						break;
+					}	
+						
+					
+					default:
+						break;
+					}
+					break;
+				}
+		
 				default:
 				printf("unknown opcode: 0x%04X\n", opcode);
 				running = 0;
