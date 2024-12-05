@@ -336,8 +336,17 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 		
 }
 
-int main(int argc,char *argv){
-	const char * filename = "IBM_Logo.ch8";
+int main(int argc,char *argv[]){
+	// char fp[100];
+	// printf("Enter filename:\n");
+	// scanf("%s", fp);
+	// const char * filename = fp;
+
+	if(argc<2){
+		fprintf(stderr,"Useage: %s <filename>\n",argv[0]);
+		return 1;
+	}
+	const char * filename = argv[1];
 	// Memory allocated on the heap
 	c8 = malloc(sizeof(struct chip8structure)); //allocate at runtime, malloc is a run time function
 	if(c8 == NULL){
@@ -359,7 +368,7 @@ int main(int argc,char *argv){
 	
 	printf("SDL initialized\n");
 	
-	//Initializing display 64x32
+	//Initializing display 
 	
         SDL_Window * window = SDL_CreateWindow( "chip8",
                               SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED, 840,
@@ -420,6 +429,8 @@ int main(int argc,char *argv){
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer,texture,NULL,NULL);
 		SDL_RenderPresent(renderer);
+
+		SDL_Delay(16); //60 FPS
 	}
 
 
