@@ -351,8 +351,9 @@ int main(int argc,char *argv){
 	chip8(filename);
 
 	//initialize SDL
-	if(SDL_Init(SDL_INIT_VIDEO)==-1){
+	if(SDL_Init(SDL_INIT_VIDEO)!=0){//SDL_Init function returns 0 on success and a negative error code on failure
 		fprintf(stderr,"SDL not initialized,%s\n", SDL_GetError());
+		SDL_Quit();
 		return -1;// Return an error code
 	}
 	
@@ -361,18 +362,76 @@ int main(int argc,char *argv){
 	//Initializing display 64x32
 	
         SDL_Window * window = SDL_CreateWindow( "chip8",
-                              SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED, 640,
-                               320, 0x00000004);
+                              SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED, 840,
+                               520, 0x00000004);//  SDL_WINDOW_SHOWN = 0x00000004
 	
-	SDL_Delay(5000);
+	//error handling
 	if(window ==NULL){
-		fprintf(stderr,"Couldn't initialize display, %s\n",SDL_GetError());
+		fprintf(stderr,"Couldn't initialize display:, %s\n",SDL_GetError());
+		SDL_Quit();
 		exit(1);
 	}
-	
+
+	// Create a renderer
+	SDL_Renderer *renderer= SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
+
+	//error handling
+	if(!renderer){
+		fprintf(stderr,"Couldn't create renderer:, %s\n",SDL_GetError());
+		SDL_Quit();
+		exit(1);
+	}
+
+	//create texture
+	SDL_Texture *texture= SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 64,32);
+
+	//error handling
+	if(!texture){
+		fprintf(stderr,"Couldn't create texture:, %s\n",SDL_GetError());
+		SDL_Quit();
+		exit(1);
+	}
+
+	//event loop
+	SDL_Event event;
+	int run=1;
+	while (run)
+	{
+		while(SDL_PollEvent(&event)){
+			//check for events
+			if(event.type == SDL_QUIT){
+				run=0;
+			}
+		}
+//64 * 32 = 2048 elements. Initializes all elements of the pixels array to 0 or "off"
+		uint32_t pixels[64 * 32]={0};//pixels array stores color of each pixel in chip8 display
+		for(int i=0; i<32; i++){//row
+			for(int j=0; j<64; j++){//column
+			//retrive value of the pixel in the chip8 display array
+				uint8_t pixel = c8->display[i * 64 + j]; 
+				pixels[i * 64 + j] = pixel? 0xFFFFFFFF : 0xFF000000;
+				//0xFFFFFFFF = white | if pixel non-zero then white
+			}
+		}
+
+		SDL_UpdateTexture(texture,NULL, pixels, 64 * sizeof(uint32_t));// pitch : number of bytes in a row of pixel 
+
+		//Render
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer,texture,NULL,NULL);
+		SDL_RenderPresent(renderer);
+	}
+
+
+
+
+	//clean-up
+	SDL_DestroyTexture(texture);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 	printf("Quitting.....\n");
-
+    
 	free(c8);// free the allocated heap memory of chip8structure
 	
 	return 0;
