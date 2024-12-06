@@ -322,8 +322,7 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 					switch (NN)
 					{
 					case 0x9E:{
-						printf("0xE nokke daa: %4x",c8->V[X]);
-						if(keyState[c8->V[X]]==1){//0x1 == 
+						if(keyState[c8->V[X]]==1){
 							c8->PC+=2;
 							keyState[c8->V[X]]=0;
 						}
