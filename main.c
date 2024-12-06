@@ -55,7 +55,23 @@ const uint8_t font[80]={
 void fontspace(struct chip8structure *c8){
 	 memcpy(c8->memory, font, sizeof(font));
 };
-//void *memcpy(void *to, const void *from, size_t numBytes);
+
+//Mapping key
+/*
+123C -> 1234
+456D -> QWER
+789E -> ASDF
+A0BF -> ZXCV
+*/
+const int keyMap[16]={
+	SDLK_1,SDLK_2, SDLK_3, SDLK_4, // 1 2 3 4 
+	SDLK_q, SDLK_w, SDLK_e, SDLK_r,// 5 6 7 8
+	SDLK_a, SDLK_s, SDLK_d, SDLK_f,// 9 A B C 
+	SDLK_z,SDLK_x,SDLK_c,SDLK_v    // D E F 0
+};
+
+//change all key state to not pressed
+uint8_t keyState[16]={0};
 
 //********** Clear the memory, registers and screen ************
 int Initialize(struct chip8structure *c8){
@@ -179,7 +195,7 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 				}
 
 				case 0x6:{
-					c8->V[X]==NN;
+					c8->V[X]=NN;
 					break;
 				}
 
@@ -306,9 +322,15 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 					switch (NN)
 					{
 					case 0x9E:{
+						printf("0xE nokke daa: %4x",c8->V[X]);
+						if(keyState[c8->V[X]]==1){//0x1 == 
+							c8->PC+=2;
+							keyState[c8->V[X]]=0;
+						}
 						break;
 					}
 					case 0xA1:{
+						
 						break;
 					}	
 						
@@ -358,7 +380,7 @@ int main(int argc,char *argv[]){
 	
 	Initialize(c8);
 	chip8(filename);
-
+ 
 	//initialize SDL
 	if(SDL_Init(SDL_INIT_VIDEO)!=0){//SDL_Init function returns 0 on success and a negative error code on failure
 		fprintf(stderr,"SDL not initialized,%s\n", SDL_GetError());
@@ -411,8 +433,18 @@ int main(int argc,char *argv[]){
 			if(event.type == SDL_QUIT){
 				run=0;
 			}
+
+			if (event.type== SDL_KEYDOWN){
+			printf("keypressed:%s sym: %d\n",SDL_GetKeyName(event.key.keysym.sym),event.key.keysym.sym);
+				for(int i=0; i<16; i++){
+					if(event.key.keysym.sym == keyMap[i]){
+						keyState[i]=1;//pressed
+					}
+				}
+		    }
 		}
-//64 * 32 = 2048 elements. Initializes all elements of the pixels array to 0 or "off"
+		
+        //64 * 32 = 2048 elements. Initializes all elements of the pixels array to 0 or "off"
 		uint32_t pixels[64 * 32]={0};//pixels array stores color of each pixel in chip8 display
 		for(int i=0; i<32; i++){//row
 			for(int j=0; j<64; j++){//column
