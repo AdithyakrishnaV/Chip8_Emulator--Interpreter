@@ -1,6 +1,6 @@
 FLAG= $(shell sdl2-config --cflags --libs)
 
 all:
-	gcc main.c -o chip8 $(FLAG)
+	gcc main.c -g -o chip8 $(FLAG)
 
 
