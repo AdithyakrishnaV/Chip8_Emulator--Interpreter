@@ -135,8 +135,8 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 			uint16_t opcode= c8->memory[c8->PC] << 8 | c8->memory[c8->PC+1];//fetch instruction
 
 			//------------Print to debug error in reading
-			printf("PC = %03X, Memory[PC] = %02X, Memory[PC+1] = %02X\n", c8->PC, c8->memory[c8->PC], c8->memory[c8->PC + 1]);
-			printf("opcode= %04x\n",opcode);
+			// printf("PC = %03X, Memory[PC] = %02X, Memory[PC+1] = %02X\n", c8->PC, c8->memory[c8->PC], c8->memory[c8->PC + 1]);
+			// printf("opcode= %04x\n",opcode);
 
 			//decode //execute
 			//*********handle the opcodes.*************
@@ -146,13 +146,13 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 			uint8_t  N = opcode&0x000F;
 			uint16_t X = (opcode&0x0F00) >> 8;
 			uint16_t Y= (opcode&0x00F0) >> 4;
-			printf("X = %02X\n", X);
-			printf("Y = %02X\n", Y);
+			//printf("X = %02X\n", X);
+			//printf("Y = %02X\n", Y);
 			switch(type){//Decode first nibble
 				case 0x0:
 				{
 					switch(NNN){// handle special case for 0x0NNN
-						case 0x00E0:{
+						case 0x0E0:{
 						//clear screen
 						memset(c8->display,0,sizeof(c8->display));
 						printf("screen clear\n");
@@ -160,7 +160,7 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 						}
 						
 						case 0x0EE:{
-							c8->stack[c8->sp]=c8->PC; //sets program counter to the address at the top of the stack
+							c8->PC=c8->stack[c8->sp]; //sets program counter to the address at the top of the stack
 							c8->sp--;//subtracts 1 from the stack pointer
 							break;
 						}
@@ -333,7 +333,7 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 					switch (NN)
 					{
 					case 0x9E:{
-						printf("%d\n", c8->V[X]);
+						//printf("%d\n", c8->V[X]);
 						int a=-1;
 						for(int i=0; i<16; i++){
 							if(keyMap[i]==c8->V[X]){
@@ -426,7 +426,6 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 							c8->memory[c8->I] = c8->V[X] / 100;         // Hundreds digit
 							c8->memory[c8->I + 1] = (c8->V[X] / 10) % 10; // Tens digit
 							c8->memory[c8->I + 2] = c8->V[X] % 10;        // Ones digit
-   
 							break;
 						}
 
@@ -448,10 +447,13 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 						default:
 							break;
 					}
+
+					
+					
 				}
 		
 				default:
-				printf("unknown opcode: 0x%04X\n", opcode);
+				//printf("unknown opcode: 0x%04X\n", opcode);
 				running = 0;
 			}
 			
