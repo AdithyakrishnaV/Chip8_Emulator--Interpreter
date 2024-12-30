@@ -6,6 +6,9 @@ CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker on
 
 <a href="https://en.wikipedia.org/wiki/CHIP-8#Virtual_machine_description" target="_blank"> Components </a>
 
-<img src="https://github.com/user-attachments/assets/251cd5cf-3bd2-4002-bef6-a7eac2e8c3a8" alt="chip-8"/>
+<img src="https://github.com/user-attachments/assets/2f5019de-8765-4566-a281-9ac00fc89e9c" alt="chip-8"/>
+
+
+<img src="https://github.com/user-attachments/assets/008f1361-db9a-4f9f-9a18-fd14f245fe56" alt="chip-8"/>
 
 
