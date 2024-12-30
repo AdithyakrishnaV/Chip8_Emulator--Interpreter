@@ -454,8 +454,7 @@ void chip8(const char * filename ){// In C, when variable is passed as a paramet
 		
 				default:
 				//printf("unknown opcode: 0x%04X\n", opcode);
-				 //running = 0;
-				break;
+				running = 0;
 			}
 			
 			
@@ -577,9 +576,8 @@ int main(int argc,char *argv[]){
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer,texture,NULL,NULL);
 		SDL_RenderPresent(renderer);
-		
 
-		SDL_Delay(16); //60 FPS
+		// SDL_Delay(16); //60 FPS
 	}
 
 
