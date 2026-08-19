@@ -5,6 +5,7 @@ Requirements:
 ```bash
 sudo apt install libsdl2-dev
 ```
+Make sure you implement  <a href="http://wiki.libsdl.org/SDL2/MigrationGuide" target="_blank"> SDL2 </a> not SDL 1.2.
 
 <a href="http://devernay.free.fr/hacks/chip8/C8TECH10.HTM" target="_blank"> Documentation </a>
 
