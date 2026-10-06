@@ -3,7 +3,7 @@ CFLAGS= -Wall -Waddress
 TARGET= chip8
 
 $(TARGET): main.c
-	$(CC) $(CFLAGS) main.c -o $(TARGET) -lSDL2
+	$(CC) $(CFLAGS) main.c core_loop.c -o $(TARGET) -lSDL2
 
 .PHONY: clean
 clean:

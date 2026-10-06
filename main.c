@@ -1,23 +1,14 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>//Angle Brackets <...>: Tells the compiler to look inside the system's global library directory. On Ubuntu, this primary directory is /usr/include/
+#include <string.h>
+#include "core_loop.h"
 
-typedef struct {
-    uint8_t ram[4096]; //8bits=1byte, 1byte x 4096bytes = 4kb
-    uint16_t pc;
-    uint16_t I;
-    uint16_t stack[16];
-    uint8_t sp; //stack pointer
-    uint8_t dTimer;
-    uint8_t sTimer;
-    uint8_t V[16];
-}chip8;
-//declare globally
-chip8 *ch;
+
 
 //keyboard
 
 //Font: memory (0x000-0x1FF), it is common to store font data there.
-const uint8_t font[]={
+const uint8_t font[80]={
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -35,6 +26,9 @@ const uint8_t font[]={
     0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
+// struct 
+chip8 ch;
+
 // startup function
 void start(chip8 *ch){
     //memset() is used to fill a block of memory with a particular value.
@@ -43,12 +37,21 @@ void start(chip8 *ch){
     ch->sp=0;//stack pointer
     ch->pc=0x200;
 }
+void font_set(chip8 *ch){
+    memcpy(&ch->ram[0x000], font, sizeof(font));//(&ch->ram[0x000]: memcpy need the address of the first slot not the value in 0x000 value is 0
+}
 
 int main(int argc, char *argv[]){
 
-    void start(chip8 *ch);
+    start(&ch);
+    font_set(&ch);
 
+    if(argc < 2){
+        printf("No ROM given.\n");
+        printf("Use: ./chip8 <program_location>\n");
+    }
     
+    file_op(argv[1]);//argv[1] is already an address pointing to the first letter of the string
     
     //Initialize SDL display
     printf("Initializing SDL\n");
