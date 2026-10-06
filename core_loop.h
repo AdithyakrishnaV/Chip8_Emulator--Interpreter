@@ -18,5 +18,8 @@ typedef struct {
 
 //prototypes of all functions delcare here, so any .c file including that header knows they exist and knows how to use them.
 void file_op(char  *opcode);
+void start(chip8 *ch);
+void font_set(chip8 *ch);
+
 
 #endif
