@@ -2,7 +2,7 @@ CC= gcc
 CFLAGS= -Wall -Waddress
 TARGET= chip8
 
-$(TARGET): main.c
+$(TARGET): main.c core_loop.c core_loop.h # add new files here for compiler to check for changes
 	$(CC) $(CFLAGS) main.c core_loop.c -o $(TARGET) -lSDL2
 
 .PHONY: clean

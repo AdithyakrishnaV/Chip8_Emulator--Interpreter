@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
         printf("Use: ./chip8 <program_location>\n");
     }
     
-    file_op(argv[1]);//argv[1] is already an address pointing to the first letter of the string
+    file_op(argv[1],&ch);//argv[1] is already an address pointing to the first letter of the string
     
     //Initialize SDL display
     printf("Initializing SDL\n");
