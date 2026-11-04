@@ -17,6 +17,11 @@ void file_op(char* file, chip8 *ch){
     while(t==1){
         // Fetch: Combine two consecutive 8-bit RAM bytes into one 16-bit opcode (Big-Endian)
         uint16_t opcode = (ch->ram[ch->pc] <<8) | ch->ram[ch->pc+1];
+        uint16_t nnn= (opcode & 0x0fff);
+        uint8_t    n= (opcode & 0xf);
+        uint8_t    x= (opcode >> 8)  &0xf;
+        uint8_t    y= (opcode >> 4)  &0xf;
+        uint8_t byte= (opcode &0xff);
         printf("mc- opcode:%x\n",opcode);
         t=0;
         //pc+=2;//calculation done in bytes so 2 byte = 16 bits
