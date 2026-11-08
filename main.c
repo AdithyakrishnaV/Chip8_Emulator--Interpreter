@@ -36,7 +36,10 @@ void start(chip8 *ch){
     memset(ch->stack, 0, sizeof(ch->stack));//reg zero
     ch->sp=0;//stack pointer
     ch->pc=0x200;
+    //display array (pixels) set to 0
+    memset(ch->display,0, sizeof(ch->display));
 }
+
 void font_set(chip8 *ch){
     memcpy(&ch->ram[0x000], font, sizeof(font));//(&ch->ram[0x000]: memcpy need the address of the first slot not the value in 0x000 value is 0
 }

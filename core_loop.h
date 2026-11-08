@@ -13,6 +13,7 @@ typedef struct {
     uint8_t dTimer;
     uint8_t sTimer;
     uint8_t V[16];
+    uint8_t display[2048];//array of 2,048 single-byte integers
 }chip8;
 
 
