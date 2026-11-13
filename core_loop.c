@@ -13,6 +13,7 @@ void file_op(char* file, chip8 *ch){
 
     //directly read to memory
     fread(&ch->ram[0x200],sizeof(uint8_t),3584,opcode_file);
+    fclose(opcode_file);
 
     int t=1;
     while(t==1){
@@ -135,7 +136,32 @@ void file_op(char* file, chip8 *ch){
                 break;
             }
 
-            //case  
+            case 0x9:{
+                if(ch->V[x] != ch->V[y]){
+                    ch->pc+=2;
+                }
+                break;
+            }
+
+            case 0xA:
+                ch->I=nnn;
+                break;
+
+            case 0xB:
+                ch->pc=nnn + ch->V[0];
+                break;
+            
+            case 0xC:{
+                int random_value= rand()% 256;//rand() % 256 divides the random integer by 256 and returns the remainder, range from 0 to 255. 
+                ch->V[x]=random_value & nn;
+                break;
+            }
+
+            case 0xD:{// Dxyn (DRW) instruction is the graphics engine and collision detector 
+
+                break;
+            }
+
             
 
             default:
@@ -147,7 +173,7 @@ void file_op(char* file, chip8 *ch){
         //pc+=2;//calculation done in bytes so 2 byte = 16 bits
     }
 
-    fclose(opcode_file);
+    
 
 }
 //  fread(buffer, sizeof(int),5, file);
